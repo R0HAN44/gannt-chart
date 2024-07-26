@@ -37,11 +37,39 @@ const App = () => {
       actualEnd: '2024-02-20'
     },
     {
-      task: 'Task 2',
+      task: 'Task 2', 
       plannedStart: '2024-02-01',
       plannedEnd: '2024-03-15',
       actualStart: '2024-02-10',
       actualEnd: '2024-03-25'
+    },
+    {
+      task: 'Task 3',
+      plannedStart: '2024-03-01',
+      plannedEnd: '2024-04-15',
+      actualStart: '2024-03-10',
+      actualEnd: '2024-04-25'
+    },
+    {
+      task: 'Task 4',
+      plannedStart: '2024-04-01',
+      plannedEnd: '2024-05-15',
+      actualStart: '2024-04-10',
+      actualEnd: '2024-05-25'
+    },
+    {
+      task: 'Task 5',
+      plannedStart: '2024-05-01',
+      plannedEnd: '2024-06-15',
+      actualStart: '2024-05-10',
+      actualEnd: '2024-06-25'
+    },
+    {
+      task: 'Task 6',
+      plannedStart: '2024-06-01',
+      plannedEnd: '2024-07-15',
+      actualStart: '2024-06-10',
+      actualEnd: '2024-07-25'
     },
     // More tasks...
   ];

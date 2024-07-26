@@ -1,3 +1,8 @@
+.svg-comp{
+  background-color: aqua;
+  /* border: 2px solid black; */
+}
+
 .x-axis-months path,
 .x-axis-weeks path,
 .y-axis path {
@@ -14,20 +19,20 @@
 
 .x-axis-months text,
 .x-axis-weeks text {
-  font-size: 12px;
-  text-anchor: middle;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .x-axis-months .tick text {
   transform: translate(0, -15px);
 }
 
-.y-axis .tick line {
-  stroke: #000;
+.y-axis .tick {
+  font-size: 18px;
 }
 
 .grid-lines line {
-  stroke-opacity: 0.3;
+  stroke-opacity: 0.8;
 }
 
 .week-separators line {
@@ -35,5 +40,6 @@
 }
 
 .x-axis-weeks .tick {
-  stroke: #000;
+  /* stroke: #000; */
 }
+

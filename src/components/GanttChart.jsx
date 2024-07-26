@@ -25,8 +25,9 @@ const GanttChart = ({ data }) => {
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
+      .attr("class","svg-comp")
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${margin.left},${margin.top})`)
 
     // Parse dates
     const parseTime = d3.timeParse("%Y-%m-%d");
@@ -64,7 +65,9 @@ const GanttChart = ({ data }) => {
     const y = d3.scaleBand()
       .domain(validData.map(d => d.task))
       .range([0, height])
-      .padding(0.4);
+      .padding(0.5)
+      .align(0.8);
+      
 
     // Create custom tick values for months and weeks
     const monthTicks = d3.timeMonths(...x.domain());
@@ -74,25 +77,48 @@ const GanttChart = ({ data }) => {
     const xAxisMonths = d3.axisTop(x)
       .tickValues(monthTicks)
       .tickFormat(d3.timeFormat("%B"))
-      .tickSize(0);
+      .tickSize(0)
 
     const xAxisWeeks = d3.axisTop(x)
       .tickValues(weekTicks)
       .tickFormat((d, i) => `${(i % 4) + 1}w`)
-      .tickSize(0);
+      .tickSize(10);
+
+    const yAxis = d3.axisLeft(y)
+      .tickSize(0)
 
     svg.append("g")
       .attr("class", "x-axis-months")
-      .call(xAxisMonths);
+      .attr("transform",`translate(0, ${-margin.bottom})`)
+      .selectAll(".month-label")
+      .data(monthTicks)
+      .enter().append("text")
+      .attr("class", "month-label")
+      .attr("x", d => x(d))
+      .attr("y", -margin.bottom)
+      .text(d => d3.timeFormat("%B")(d));
 
     svg.append("g")
       .attr("class", "x-axis-weeks")
-      .attr("transform", `translate(0, 30)`)
+      .attr("transform", `translate(0, 0)`)
       .call(xAxisWeeks);
 
     svg.append("g")
       .attr("class", "y-axis")
-      .call(d3.axisLeft(y));
+      .attr("transform", `translate(-10, 0)`)
+      .call(yAxis)
+
+
+
+      const quarterLines = monthTicks.flatMap(d => {
+        const startOfMonth = x(d);
+        const endOfMonth = x(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+        const daysInMonth = (new Date(d.getFullYear(), d.getMonth() + 1, 0) - d) / (1000 * 60 * 60 * 24);
+        const daysFromStartDate = (endOfMonth - startOfMonth) / daysInMonth;
+        const quarterPositions = [1, 2, 3].map(i => startOfMonth + i * daysFromStartDate * (daysInMonth / 4));
+      
+        return quarterPositions;
+      });
 
     // Add grid lines
     svg.append("g")
@@ -103,34 +129,60 @@ const GanttChart = ({ data }) => {
       .append("line")
       .attr("x1", d => x(d))
       .attr("x2", d => x(d))
-      .attr("y1", 0)
-      .attr("y2", height);
+      .attr("y1", -margin.top)
+      .attr("y2", height + margin.bottom)
+      .attr("stroke", "black")
+      .attr("stroke-width", 1.5)
 
     // Add week separators in header
-    svg.append("g")
-      .attr("class", "week-separators")
-      .selectAll("line")
-      .data(weekTicks)
-      .enter()
-      .append("line")
-      .attr("x1", d => x(d))
-      .attr("x2", d => x(d))
-      .attr("y1", 0)
-      .attr("y2", 60);
+
+      // svg.append("g")
+      // .attr("class", "quarter-separators")
+      // .selectAll("line")
+      // .data(quarterLines)
+      // .enter()
+      // .append("line")
+      // .attr("x1", d => d)
+      // .attr("x2", d => d)
+      // .attr("y1", 0)
+      // .attr("y2", 40)
+      // .attr("stroke", "grey")
+      // .attr("stroke-dasharray", "4,2");
+
+    
+    // svg.append("g")
+    //   .attr("class", "week-separators")
+    //   .selectAll("line")
+    //   .data(weekTicks)
+    //   .enter()
+    //   .append("line")
+    //   .attr("x1", d => x(d))
+    //   .attr("x2", d => x(d))
+    //   .attr("y1", 0)
+    //   .attr("y2", 40);
 
     // Add horizontal line below header
     svg.append("line")
-      .attr("x1", 0)
-      .attr("x2", width)
-      .attr("y1", 60)
-      .attr("y2", 60)
+      .attr("x1", -margin.left)
+      .attr("x2", width + margin.right)
+      .attr("y1", 0)
+      .attr("y2", 0)
       .attr("stroke", "black")
       .attr("stroke-width", 2);
 
+    // Add horizontal line between months and weeks
+    svg.append("line")
+    .attr("x1", 0)
+    .attr("x2", width + margin.right)
+    .attr("y1", -margin.top/2)
+    .attr("y2", -margin.top/2)
+    .attr("stroke", "black")
+    .attr("stroke-width", 2);
+
     // Add "Task Name" header
     svg.append("text")
-      .attr("x", -margin.left + 10)
-      .attr("y", -50)
+      .attr("x", -margin.left + margin.right)
+      .attr("y", -margin.bottom)
       .attr("font-weight", "bold")
       .text("Task Name");
 
@@ -167,12 +219,13 @@ const GanttChart = ({ data }) => {
 
     // Add border to the entire chart
     svg.append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("width", width)
-      .attr("height", height)
+      .attr("x", -margin.left)
+      .attr("y", -margin.top)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.bottom + margin.top)
       .attr("fill", "none")
-      .attr("stroke", "black");
+      .attr("stroke", "black")
+      .attr("stroke-width", 4);
 
     console.log("Chart drawing completed");
   };
