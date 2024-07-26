@@ -1,0 +1,39 @@
+.x-axis-months path,
+.x-axis-weeks path,
+.y-axis path {
+  display: none;
+}
+
+.x-axis-months line,
+.x-axis-weeks line,
+.y-axis line,
+.grid-lines line,
+.week-separators line {
+  stroke: #000;
+}
+
+.x-axis-months text,
+.x-axis-weeks text {
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.x-axis-months .tick text {
+  transform: translate(0, -15px);
+}
+
+.y-axis .tick line {
+  stroke: #000;
+}
+
+.grid-lines line {
+  stroke-opacity: 0.3;
+}
+
+.week-separators line {
+  stroke-opacity: 1;
+}
+
+.x-axis-weeks .tick {
+  stroke: #000;
+}
