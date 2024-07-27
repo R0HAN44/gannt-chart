@@ -30,7 +30,7 @@ const App = () => {
   };
   const data = [
     {
-      task: 'Task 1',
+      task: 'Task 1 whcih is good',
       plannedStart: '2024-01-01',
       plannedEnd: '2024-02-15',
       actualStart: '2024-01-05',
@@ -70,6 +70,20 @@ const App = () => {
       plannedEnd: '2024-07-15',
       actualStart: '2024-06-10',
       actualEnd: '2024-07-25'
+    },
+    {
+      task: 'Task 7',
+      plannedStart: '2024-07-01',
+      plannedEnd: '2024-08-15',
+      actualStart: '2024-07-10',
+      actualEnd: '2024-08-25'
+    },
+    {
+      task: 'Task 8',
+      plannedStart: '2024-08-01',
+      plannedEnd: '2024-09-15',
+      actualStart: '2024-08-10',
+      actualEnd: '2024-09-25'
     },
     // More tasks...
   ];

@@ -1,5 +1,5 @@
 .svg-comp{
-  background-color: aqua;
+  background-color: #FEF3E2;
   /* border: 2px solid black; */
 }
 
@@ -14,7 +14,7 @@
 .y-axis line,
 .grid-lines line,
 .week-separators line {
-  stroke: #000;
+  /* stroke: #000; */
 }
 
 .x-axis-months text,
@@ -32,14 +32,15 @@
 }
 
 .grid-lines line {
-  stroke-opacity: 0.8;
+  /* stroke-opacity: 0.8; */
 }
 
 .week-separators line {
-  stroke-opacity: 1;
+  /* stroke-opacity: 1; */
 }
 
 .x-axis-weeks .tick {
   /* stroke: #000; */
 }
+
 
