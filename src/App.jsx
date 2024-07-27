@@ -30,7 +30,7 @@ const App = () => {
   };
   const data = [
     {
-      task: 'Task 1 whcih is good',
+      task: 'Task 1',
       plannedStart: '2024-01-01',
       plannedEnd: '2024-02-15',
       actualStart: '2024-01-05',
@@ -87,10 +87,34 @@ const App = () => {
     },
     // More tasks...
   ];
+  const daysData = [
+    {
+      task: 'Task 1',
+      plannedStart: '2024-02-01',
+      plannedEnd: '2024-02-05',
+      actualStart: '2024-02-02',
+      actualEnd: '2024-02-06'
+    },
+    {
+      task: 'Task 2', 
+      plannedStart: '2024-02-07',
+      plannedEnd: '2024-02-15',
+      actualStart: '2024-02-08',
+      actualEnd: '2024-02-18'
+    },
+    {
+      task: 'Task 3',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-02-26'
+    },
+    // More tasks...
+  ];
   return (
     <div className="container">
       {/* <GanttChart data={data} /> */}
-      <GanttChart data={data} />
+      <GanttChart data={daysData} scale={"days"}/>
       {/* <BarChart {...sampleData} /> */}
     </div>
   );

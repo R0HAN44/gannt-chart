@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import './GanttChart.css';
 
-const GanttChart = ({ data }) => {
+const GanttChart = ({ data,scale }) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ const GanttChart = ({ data }) => {
     console.log("Original data:", data);
 
     const margin = { top: 80, right: 30, bottom: 30, left: 200 };
-    const width = 1200 - margin.left - margin.right;
+    const width = 1400 - margin.left - margin.right;
     const height = 800 - margin.top - margin.bottom;
 
     // Clear previous chart
@@ -81,6 +81,66 @@ const GanttChart = ({ data }) => {
     const monthTicks = d3.timeMonths(...x.domain());
     // const weekTicks = d3.timeWeeks(...x.domain());
 
+    let dayTicks;
+    if (scale === 'days') {
+      dayTicks = d3.timeDays(...x.domain());
+    }
+
+     // Calculate the width of each day
+    const dayWidth = width / d3.timeDays(startOfMonth, endOfMonth).length;
+
+    const yAxis = d3.axisLeft(y)
+      .tickSize(0)
+
+    svg.append("g")
+      .attr("class", "y-axis")
+      .attr("transform", `translate(-10, 0)`)
+      .call(yAxis)
+    
+    // Draw axes
+  if (scale === 'days') {
+    // Month labels
+    svg.append("g")
+      .attr("class", "x-axis-months")
+      .attr("transform", `translate(0, ${-margin.bottom})`)
+      .selectAll(".month-label")
+      .data(monthTicks)
+      .enter().append("text")
+      .attr("class", "month-label")
+      .attr("x", d => x(d) + (x(new Date(d.getFullYear(), d.getMonth() + 1, 1)) - x(d)) / 2)
+      .attr("y", -margin.bottom)
+      .style("text-anchor", "middle")
+      .text(d => d3.timeFormat("%B")(d));
+
+    // Day labels
+    svg.append("g")
+    .attr("class", "x-axis-days")
+    .attr("transform", `translate(0, 0)`)
+    .selectAll(".day-label")
+    .data(dayTicks)
+    .enter().append("text")
+    .attr("class", "day-label")
+    .attr("x", d => x(d) + dayWidth / 2) // Center within the day's space
+    .attr("y", -12)
+    .style("text-anchor", "middle")
+    .text(d => d.getDate());
+
+    // Add day separators
+    svg.append("g")
+      .attr("class", "day-separators")
+      .selectAll("line")
+      .data(dayTicks)
+      .enter()
+      .append("line")
+      .attr("x1", d => x(d))
+      .attr("x2", d => x(d))
+      .attr("y1", -margin.top/2)
+      .attr("y2", height + margin.bottom)
+      .attr("stroke", "#606676")
+      .attr("stroke-opacity", "0.5")
+      .attr("stroke-width", 1);
+  }else{
+
     // Generate week tick positions for each month
     const weekTicks = monthTicks.flatMap(d => {
       const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
@@ -108,8 +168,7 @@ const GanttChart = ({ data }) => {
       .tickFormat((d, i) => `${(i % 4) + 1}w`)
       .tickSize(10);
 
-    const yAxis = d3.axisLeft(y)
-      .tickSize(0)
+    
 
 
     // Compute the width of each month interval
@@ -141,11 +200,20 @@ const GanttChart = ({ data }) => {
     .style("text-anchor", "middle")
     .text(d => d.label);
 
+    //week seperator
     svg.append("g")
-      .attr("class", "y-axis")
-      .attr("transform", `translate(-10, 0)`)
-      .call(yAxis)
-
+      .attr("class", "week-separators")
+      .selectAll("line")
+      .data(weekTicks)
+      .enter()
+      .append("line")
+      .attr("x1", d => x(d))
+      .attr("x2", d => x(d))
+      .attr("y1", -margin.top/2)
+      .attr("y2", 0)
+      .attr("stroke", "#606676")
+      .attr("stroke-opacity","1")
+      .attr("stroke-width", 1.5)
 
 
       // const quarterLines = monthTicks.flatMap(d => {
@@ -158,6 +226,8 @@ const GanttChart = ({ data }) => {
       //   return quarterPositions;
       // });
 
+      
+    }
     // Add grid lines
     svg.append("g")
       .attr("class", "grid-lines")
@@ -188,20 +258,6 @@ const GanttChart = ({ data }) => {
       // .attr("stroke", "grey")
       // .attr("stroke-dasharray", "4,2");
 
-    
-    svg.append("g")
-      .attr("class", "week-separators")
-      .selectAll("line")
-      .data(weekTicks)
-      .enter()
-      .append("line")
-      .attr("x1", d => x(d))
-      .attr("x2", d => x(d))
-      .attr("y1", -margin.top/2)
-      .attr("y2", 0)
-      .attr("stroke", "#606676")
-      .attr("stroke-opacity","1")
-      .attr("stroke-width", 1.5)
 
     // Add horizontal line below header
     svg.append("line")
