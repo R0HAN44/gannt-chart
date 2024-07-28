@@ -28,7 +28,7 @@ const App = () => {
     xaxistext: 'Months',
     yaxistext: 'Sales (in units)'
   };
-  const data = [
+  const monthsData = [
     {
       task: 'Task 1',
       plannedStart: '2024-01-01',
@@ -111,10 +111,43 @@ const App = () => {
     },
     // More tasks...
   ];
+  const yearsData = [
+    {
+      task: 'Task 1',
+      plannedStart: '2024-02-01',
+      plannedEnd: '2025-02-05',
+      actualStart: '2024-03-02',
+      actualEnd: '2025-03-06'
+    },
+    {
+      task: 'Task 2', 
+      plannedStart: '2024-06-07',
+      plannedEnd: '2025-04-15',
+      actualStart: '2024-07-08',
+      actualEnd: '2025-05-18'
+    },
+    {
+      task: 'Task 3',
+      plannedStart: '2025-02-18',
+      plannedEnd: '2026-01-25',
+      actualStart: '2025-04-19',
+      actualEnd: '2026-03-26'
+    },
+    {
+      task: 'Task 4',
+      plannedStart: '2025-08-18',
+      plannedEnd: '2026-07-25',
+      actualStart: '2025-09-19',
+      actualEnd: '2026-09-26'
+    },
+    // More tasks...
+  ];
   return (
     <div className="container">
       {/* <GanttChart data={data} /> */}
-      <GanttChart data={daysData} scale={"days"}/>
+      <GanttChart data={yearsData} scale={"year"}/>
+      {/* <GanttChart data={daysData} scale={"days"}/> */}
+      {/* <GanttChart data={monthsData} scale={"month"}/> */}
       {/* <BarChart {...sampleData} /> */}
     </div>
   );

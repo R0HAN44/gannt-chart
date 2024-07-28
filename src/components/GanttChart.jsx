@@ -59,14 +59,21 @@ const GanttChart = ({ data,scale }) => {
     const minDate = d3.min(validData, d => d.plannedStart);
     const maxDate = d3.max(validData, d => d.actualEnd || d.plannedEnd);
 
-    const startOfMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-    const endOfMonth = new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0);
+    let startDate, endDate;
+    if (scale === 'year') {
+      startDate = new Date(minDate.getFullYear(), 0, 1);
+      endDate = new Date(maxDate.getFullYear() + 1, 0, 1);
+    } else {
+      startDate = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+      endDate = new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0);
+    }
 
+    
 
     const x = d3.scaleTime()
       .domain([
-        startOfMonth,
-        endOfMonth
+        startDate,
+        endDate
       ])
       .range([0, width]);
 
@@ -80,6 +87,7 @@ const GanttChart = ({ data,scale }) => {
     // Create custom tick values for months and weeks
     const monthTicks = d3.timeMonths(...x.domain());
     // const weekTicks = d3.timeWeeks(...x.domain());
+    
 
     let dayTicks;
     if (scale === 'days') {
@@ -87,7 +95,7 @@ const GanttChart = ({ data,scale }) => {
     }
 
      // Calculate the width of each day
-    const dayWidth = width / d3.timeDays(startOfMonth, endOfMonth).length;
+    const dayWidth = width / d3.timeDays(startDate, endDate).length;
 
     const yAxis = d3.axisLeft(y)
       .tickSize(0)
@@ -139,7 +147,93 @@ const GanttChart = ({ data,scale }) => {
       .attr("stroke", "#606676")
       .attr("stroke-opacity", "0.5")
       .attr("stroke-width", 1);
-  }else{
+
+
+    // Add grid lines
+    svg.append("g")
+      .attr("class", "grid-lines")
+      .selectAll("line")
+      .data(monthTicks)
+      .enter()
+      .append("line")
+      .attr("x1", d => x(d))
+      .attr("x2", d => x(d))
+      .attr("y1", -margin.top)
+      .attr("y2", height + margin.bottom)
+      .attr("stroke", "#606676")
+      .attr("stroke-opacity","1")
+      .attr("stroke-width", 1.5)
+  }
+  else if(scale === "year"){
+      const yearTicks = d3.timeYears(startDate, endDate);
+      const monthTicks = d3.timeMonths(startDate, endDate);
+      const yearLabelHeight = margin.top / 2;
+
+      // Year labels
+      svg.append("g")
+        .attr("class", "x-axis-years")
+        .attr("transform", `translate(0, ${-margin.bottom})`)
+        .selectAll(".year-label")
+        .data(yearTicks)
+        .enter().append("text")
+        .attr("class", "year-label")
+        .attr("x", d => x(d) + (x(new Date(d.getFullYear() + 1, 0, 1)) - x(d)) / 2)
+        .attr("y", -margin.bottom)
+        .style("text-anchor", "start")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text(d => d.getFullYear());
+
+      // Month labels (first letter)
+      svg.append("g")
+    .attr("class", "x-axis-months")
+    .attr("transform", `translate(0, 0)`)
+    .selectAll(".month-label")
+    .data(monthTicks)
+    .enter().append("text")
+    .attr("class", "month-label")
+    .attr("x", d => {
+      const monthStart = x(d);
+      const monthEnd = x(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+      return monthStart + (monthEnd - monthStart) / 2;
+    })
+    .attr("y",  -10)
+    .style("text-anchor", "middle")
+    .style("font-size", "16px")
+    .text(d => d3.timeFormat("%b")(d).charAt(0));
+
+      // Add year separators
+      svg.append("g")
+        .attr("class", "year-separators")
+        .selectAll("line")
+        .data(yearTicks)
+        .enter()
+        .append("line")
+        .attr("x1", d => x(d))
+        .attr("x2", d => x(d))
+        .attr("y1", -margin.top)
+        .attr("y2", height + margin.bottom)
+        .attr("stroke", "#606676")
+        .attr("stroke-opacity", "1")
+        .attr("stroke-width", 1.5);
+
+      // Add month separators
+      svg.append("g")
+        .attr("class", "month-separators")
+        .selectAll("line")
+        .data(monthTicks)
+        .enter()
+        .append("line")
+        .attr("x1", d => x(d))
+        .attr("x2", d => x(d))
+        .attr("y1", -margin.top/2)
+        .attr("y2", height + margin.bottom)
+        .attr("stroke", "#606676")
+        .attr("stroke-opacity", "1")
+        .attr("stroke-width", 1);
+
+  }
+  else{
 
     // Generate week tick positions for each month
     const weekTicks = monthTicks.flatMap(d => {
@@ -215,19 +309,6 @@ const GanttChart = ({ data,scale }) => {
       .attr("stroke-opacity","1")
       .attr("stroke-width", 1.5)
 
-
-      // const quarterLines = monthTicks.flatMap(d => {
-      //   const startOfMonth = x(d);
-      //   const endOfMonth = x(new Date(d.getFullYear(), d.getMonth() + 1, 1));
-      //   const daysInMonth = (new Date(d.getFullYear(), d.getMonth() + 1, 0) - d) / (1000 * 60 * 60 * 24);
-      //   const daysFromStartDate = (endOfMonth - startOfMonth) / daysInMonth;
-      //   const quarterPositions = [1, 2, 3].map(i => startOfMonth + i * daysFromStartDate * (daysInMonth / 4));
-      
-      //   return quarterPositions;
-      // });
-
-      
-    }
     // Add grid lines
     svg.append("g")
       .attr("class", "grid-lines")
@@ -242,6 +323,21 @@ const GanttChart = ({ data,scale }) => {
       .attr("stroke", "#606676")
       .attr("stroke-opacity","1")
       .attr("stroke-width", 1.5)
+
+
+      // const quarterLines = monthTicks.flatMap(d => {
+      //   const startOfMonth = x(d);
+      //   const endOfMonth = x(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+      //   const daysInMonth = (new Date(d.getFullYear(), d.getMonth() + 1, 0) - d) / (1000 * 60 * 60 * 24);
+      //   const daysFromStartDate = (endOfMonth - startOfMonth) / daysInMonth;
+      //   const quarterPositions = [1, 2, 3].map(i => startOfMonth + i * daysFromStartDate * (daysInMonth / 4));
+      
+      //   return quarterPositions;
+      // });
+
+      
+    }
+    
 
     // Add week separators in header
 
