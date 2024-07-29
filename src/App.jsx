@@ -85,6 +85,20 @@ const App = () => {
       actualStart: '2024-08-10',
       actualEnd: '2024-09-25'
     },
+    {
+      task: 'Task 9',
+      plannedStart: '2024-09-01',
+      plannedEnd: '2024-10-15',
+      actualStart: '2024-09-10',
+      actualEnd: '2024-10-25'
+    },
+    {
+      task: 'Task 10',
+      plannedStart: '2024-11-01',
+      plannedEnd: '2024-12-15',
+      actualStart: '2024-11-10',
+      actualEnd: '2024-12-25'
+    },
     // More tasks...
   ];
   const daysData = [
@@ -107,7 +121,42 @@ const App = () => {
       plannedStart: '2024-02-18',
       plannedEnd: '2024-02-25',
       actualStart: '2024-02-19',
-      actualEnd: '2024-02-26'
+      actualEnd: '2024-03-05'
+    },
+    {
+      task: 'Task 4',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-03-05'
+    },
+    {
+      task: 'Task 5',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-03-05'
+    },
+    {
+      task: 'Task 6',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-04-05'
+    },
+    {
+      task: 'Task 3',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-03-05'
+    },
+    {
+      task: 'Task 7',
+      plannedStart: '2024-02-18',
+      plannedEnd: '2024-02-25',
+      actualStart: '2024-02-19',
+      actualEnd: '2024-03-05'
     },
     // More tasks...
   ];
@@ -143,11 +192,11 @@ const App = () => {
     // More tasks...
   ];
   return (
-    <div className="container">
+    <div className="container" style={{ width: '100%', height: '100vh' }}>
       {/* <GanttChart data={data} /> */}
-      <GanttChart data={yearsData} scale={"year"}/>
+      <GanttChart data={yearsData} scale={"years"}/>
       {/* <GanttChart data={daysData} scale={"days"}/> */}
-      {/* <GanttChart data={monthsData} scale={"month"}/> */}
+      {/* <GanttChart data={monthsData} scale={"months"}/> */}
       {/* <BarChart {...sampleData} /> */}
     </div>
   );

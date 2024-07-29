@@ -1,22 +1,39 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import d3Tip from "d3-tip";
 import './GanttChart.css';
 
 const GanttChart = ({ data,scale }) => {
   const chartRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 1400, height: 800 }); // Set default dimensions
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (chartRef.current) {
+        const { width } = chartRef.current.getBoundingClientRect();
+        // Keep the height fixed, adjust only the width
+        setDimensions({ width: Math.max(width, 1400), height: 800 });
+      }
+    };
+
+    window.addEventListener('resize', updateDimensions);
+    updateDimensions();
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, []);
 
   useEffect(() => {
     if (data && chartRef.current) {
       drawChart();
     }
-  }, [data]);
+  }, [data, dimensions]);
 
   const drawChart = () => {
     console.log("Original data:", data);
 
     const margin = { top: 80, right: 30, bottom: 30, left: 200 };
-    const width = 1400 - margin.left - margin.right;
-    const height = 800 - margin.top - margin.bottom;
+    const width = dimensions.width - margin.left - margin.right;
+    const height = dimensions.height - margin.top - margin.bottom;
 
     // Clear previous chart
     d3.select(chartRef.current).selectAll("*").remove();
@@ -25,9 +42,26 @@ const GanttChart = ({ data,scale }) => {
       .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
-      .attr("class","svg-comp")
+      .attr("class", "svg-comp")
       .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`)
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+     // Initialize tooltip
+      const tip = d3Tip()
+      .attr('class', 'd3-tip')
+      .offset([-10, 0])
+      .html(d => {
+        return `<strong>Task:</strong> ${d.target.__data__.task}<br>
+                <strong>Planned Start:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedStart)}<br>
+                <strong>Planned End:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedEnd)}<br>
+                <strong>Actual Start:</strong> ${d.target.__data__.actualStart ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualStart) : 'N/A'}<br>
+                <strong>Actual End:</strong> ${d.target.__data__.actualEnd ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualEnd) : 'N/A'}`;
+      });
+
+      svg.call(tip);
+    
+   
 
     // Parse dates
     const parseTime = d3.timeParse("%Y-%m-%d");
@@ -54,13 +88,16 @@ const GanttChart = ({ data,scale }) => {
       return;
     }
 
+
+
+
     // Set up scales
 
     const minDate = d3.min(validData, d => d.plannedStart);
     const maxDate = d3.max(validData, d => d.actualEnd || d.plannedEnd);
 
     let startDate, endDate;
-    if (scale === 'year') {
+    if (scale === 'years') {
       startDate = new Date(minDate.getFullYear(), 0, 1);
       endDate = new Date(maxDate.getFullYear() + 1, 0, 1);
     } else {
@@ -164,7 +201,7 @@ const GanttChart = ({ data,scale }) => {
       .attr("stroke-opacity","1")
       .attr("stroke-width", 1.5)
   }
-  else if(scale === "year"){
+  else if(scale === "years"){
       const yearTicks = d3.timeYears(startDate, endDate);
       const monthTicks = d3.timeMonths(startDate, endDate);
       const yearLabelHeight = margin.top / 2;
@@ -396,13 +433,14 @@ const GanttChart = ({ data,scale }) => {
       .attr("font-weight", "bold")
       .text("Task Name");
 
+
     // Draw bars
     const taskGroups = svg.selectAll(".task")
     .data(validData)
     .enter()
     .append("g")
     .attr("class", "task")
-    .attr("transform", d => `translate(0, ${y(d.task)})`);
+    .attr("transform", d => `translate(0, ${y(d.task)})`)
   
   const barHeight = y.bandwidth() / 2; // Adjust this value to control the height of the bars and the gap
   
@@ -412,7 +450,9 @@ const GanttChart = ({ data,scale }) => {
     .attr("y", 0) // Position the planned bar at the top
     .attr("width", d => Math.max(0, x(d.plannedEnd) - x(d.plannedStart)))
     .attr("height", barHeight)
-    .attr("fill", "#37B5B6");
+    .attr("fill", "#37B5B6")
+    .on('mouseover', tip.show)
+    .on('mouseout', tip.hide);
   
   taskGroups.append("rect")
     .attr("class", "actual")
@@ -427,7 +467,9 @@ const GanttChart = ({ data,scale }) => {
       return 0;
     })
     .attr("height", barHeight)
-    .attr("fill", "#0A1D56");
+    .attr("fill", "#0A1D56")
+    .on('mouseover', tip.show)
+    .on('mouseout', tip.hide);
 
     // Add border to the entire chart
     svg.append("rect")
@@ -440,10 +482,20 @@ const GanttChart = ({ data,scale }) => {
       .attr("stroke-opacity","1")
       .attr("stroke-width", 4)
 
+    // Adjust font sizes based on screen width
+    const baseFontSize = Math.max(16, Math.min(16, width / 100));
+    svg.selectAll("text")
+      .style("font-size", `${baseFontSize}px`);
+
+    svg.selectAll(".month-label, .year-label")
+      .style("font-size", `${baseFontSize}px`);
+
     console.log("Chart drawing completed");
   };
 
-  return <div ref={chartRef}></div>;
+  return <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+  <div ref={chartRef} style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}></div>
+</div>
 };
 
 export default GanttChart;
