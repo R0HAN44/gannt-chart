@@ -48,18 +48,18 @@ const GanttChart = ({ data,scale }) => {
 
 
      // Initialize tooltip
-      const tip = d3Tip()
-      .attr('class', 'd3-tip')
-      .offset([-10, 0])
-      .html(d => {
-        return `<strong>Task:</strong> ${d.target.__data__.task}<br>
-                <strong>Planned Start:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedStart)}<br>
-                <strong>Planned End:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedEnd)}<br>
-                <strong>Actual Start:</strong> ${d.target.__data__.actualStart ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualStart) : 'N/A'}<br>
-                <strong>Actual End:</strong> ${d.target.__data__.actualEnd ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualEnd) : 'N/A'}`;
-      });
+      // const tip = d3Tip()
+      // .attr('class', 'd3-tip')
+      // .offset([-10, 0])
+      // .html(d => {
+      //   return `<strong>Task:</strong> ${d.target.__data__.task}<br>
+      //           <strong>Planned Start:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedStart)}<br>
+      //           <strong>Planned End:</strong> ${d3.timeFormat("%Y-%m-%d")(d.target.__data__.plannedEnd)}<br>
+      //           <strong>Actual Start:</strong> ${d.target.__data__.actualStart ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualStart) : 'N/A'}<br>
+      //           <strong>Actual End:</strong> ${d.target.__data__.actualEnd ? d3.timeFormat("%Y-%m-%d")(d.target.__data__.actualEnd) : 'N/A'}`;
+      // });
 
-      svg.call(tip);
+      // svg.call(tip);
     
    
 
@@ -433,6 +433,20 @@ const GanttChart = ({ data,scale }) => {
       .attr("font-weight", "bold")
       .text("Task Name");
 
+    // Create tooltip
+    const tooltip = d3
+    .select(chartRef.current)
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('background', 'rgba(0, 0, 0, 0.7)')
+    .style('color', 'white')
+    .style('padding', '10px')
+    .style('border-radius', '5px')
+    .style('font-size', '14px')
+    .style('pointer-events', 'none')
+    .style('opacity', 0);
+
 
     // Draw bars
     const taskGroups = svg.selectAll(".task")
@@ -445,31 +459,75 @@ const GanttChart = ({ data,scale }) => {
   const barHeight = y.bandwidth() / 2; // Adjust this value to control the height of the bars and the gap
   
   taskGroups.append("rect")
-    .attr("class", "planned")
-    .attr("x", d => x(d.plannedStart))
-    .attr("y", 0) // Position the planned bar at the top
-    .attr("width", d => Math.max(0, x(d.plannedEnd) - x(d.plannedStart)))
-    .attr("height", barHeight)
-    .attr("fill", "#37B5B6")
-    .on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+  .attr("class", "planned")
+  .attr("x", d => x(d.plannedStart))
+  .attr("y", 0)
+  .attr("width", d => Math.max(0, x(d.plannedEnd) - x(d.plannedStart)))
+  .attr("height", barHeight)
+  .attr("fill", "#37B5B6")
+  .on("mouseenter", function (event, d) {
+    d3.select(this).attr('opacity', 0.6);
+
+    const [mouseX, mouseY] = d3.pointer(event);
+    const barWidth = d.actualEnd ? x(d.actualEnd) - x(d.actualStart) : x(d.plannedEnd) - x(d.actualStart);
+    const tooltipX = x(d.actualStart || d.plannedStart) + barWidth;
+    const tooltipY = y(d.task) + barHeight * 1.5 + 2;
+
+    tooltip
+      .style('opacity', 1)
+      .html(`
+        <strong>Task:</strong> ${d.task}<br>
+        <strong>Planned Start:</strong> ${d3.timeFormat("%Y-%m-%d")(d.plannedStart)}<br>
+        <strong>Planned End:</strong> ${d3.timeFormat("%Y-%m-%d")(d.plannedEnd)}
+      `)
+      .style('left', `${tooltipX}px`)
+      .style('top', `${tooltipY}px`)
+      .style('transform', 'translate(-50%, -100%)');
+  })
+  .on("mouseleave", function () {
+    d3.select(this).attr('opacity', 1);
+    tooltip.style('opacity', 0);
+  });
+
+  
   
   taskGroups.append("rect")
-    .attr("class", "actual")
-    .attr("x", d => d.actualStart ? x(d.actualStart) : x(d.plannedStart))
-    .attr("y", barHeight + 2) // Position the actual bar below the planned bar with a gap
-    .attr("width", d => {
-      if (d.actualStart && d.actualEnd) {
-        return Math.max(0, x(d.actualEnd) - x(d.actualStart));
-      } else if (d.actualStart) {
-        return Math.max(0, x(d.plannedEnd) - x(d.actualStart));
-      }
-      return 0;
-    })
-    .attr("height", barHeight)
-    .attr("fill", "#0A1D56")
-    .on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+  .attr("class", "actual")
+  .attr("x", d => d.actualStart ? x(d.actualStart) : x(d.plannedStart))
+  .attr("y", barHeight + 2)
+  .attr("width", d => {
+    if (d.actualStart && d.actualEnd) {
+      return Math.max(0, x(d.actualEnd) - x(d.actualStart));
+    } else if (d.actualStart) {
+      return Math.max(0, x(d.plannedEnd) - x(d.actualStart));
+    }
+    return 0;
+  })
+  .attr("height", barHeight)
+  .attr("fill", "#0A1D56")
+  .on("mouseenter", function (event, d) {
+    d3.select(this).attr('opacity', 0.6);
+
+    const [mouseX, mouseY] = d3.pointer(event);
+    const barWidth = d.actualEnd ? x(d.actualEnd) - x(d.actualStart) : x(d.plannedEnd) - x(d.actualStart);
+    const tooltipX = x(d.actualStart || d.plannedStart) + barWidth;
+    const tooltipY = y(d.task) + barHeight * 1.5 + 2;
+
+    tooltip
+      .style('opacity', 1)
+      .html(`
+        <strong>Task:</strong> ${d.task}<br>
+        <strong>Actual Start:</strong> ${d.actualStart ? d3.timeFormat("%Y-%m-%d")(d.actualStart) : 'N/A'}<br>
+        <strong>Actual End:</strong> ${d.actualEnd ? d3.timeFormat("%Y-%m-%d")(d.actualEnd) : 'N/A'}
+      `)
+      .style('left', `${tooltipX}px`)
+      .style('top', `${tooltipY}px`)
+      .style('transform', 'translate(-50%, -100%)');
+  })
+  .on("mouseleave", function () {
+    d3.select(this).attr('opacity', 1);
+    tooltip.style('opacity', 0);
+  });
 
     // Add border to the entire chart
     svg.append("rect")
